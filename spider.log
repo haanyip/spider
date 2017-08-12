@@ -1,0 +1,2 @@
+(1366, "Incorrect string value: '\\xF0\\x9F\\x92\\xAB#\\xE6...' for column 'content' at row 149")
+(1366, "Incorrect string value: '\\xF0\\x9F\\x8C\\x80#\\xE5...' for column 'content' at row 149")
