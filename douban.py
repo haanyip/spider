@@ -38,6 +38,8 @@ for div in divs:
 		url = imgA['href']
 		img = str(imgA['style'])
 		img = img[21:-1]
+		img = img.split("?")
+        img = img[0]
 		thumbnail = json.dumps([img])
 		desc = div.find('p').a.contents
 
