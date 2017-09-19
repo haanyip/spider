@@ -8,6 +8,8 @@ import MySQLdb
 import json
 import time
 import requests
+import datetime
+import random
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -32,6 +34,17 @@ curTime = int(time.time())
 cardType = 2
 bloggerId = 3
 
+today = datetime.date.today()
+tomorrow = today + datetime.timedelta(days=1)
+today = today.strftime('%Y-%m-%d')
+tomorrow = tomorrow.strftime('%Y-%m-%d')
+
+t = time.strptime(today, "%Y-%m-%d")
+start = int(time.mktime(t))
+t = time.strptime(tomorrow, "%Y-%m-%d")
+end = int(time.mktime(t))
+
+
 for tag in tags:
 	aTags = tag.find_all('a', 'link-button')
 	for aTag in aTags:
@@ -39,7 +52,7 @@ for tag in tags:
 		img = aTag.img['src']
 		thumbnail = json.dumps([img])
 		desc = aTag.span.contents
-
+		curTime = random.randint(start, end)
 
 		try:
 			cur = conn.cursor()

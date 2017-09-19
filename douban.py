@@ -27,7 +27,6 @@ req = requests.get(videoUrl, headers=headers)
 req.encoding = 'utf-8'
 html = req.content
 soup = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
-curTime = int(time.time())
 cardType = 2
 bloggerId = 4
 
@@ -39,10 +38,16 @@ for div in divs:
 		img = str(imgA['style'])
 		img = img[21:-1]
 		img = img.split("?")
-        img = img[0]
+		img = img[0]
 		thumbnail = json.dumps([img])
 		desc = div.find('p').a.contents
 
+		html = requests.get(url, headers=headers).content
+		s = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
+		d = s.find('div', 'note-header-container')
+		curTime = d.span.text	
+		tuple = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")
+                curTime = int(time.mktime(tuple))
 		#print url
 		#print thumbnail
 		#print desc
