@@ -10,6 +10,7 @@ import time
 import requests
 import datetime
 import random
+import md5
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -53,12 +54,13 @@ for tag in tags:
 		thumbnail = json.dumps([img])
 		desc = aTag.span.contents
 		curTime = random.randint(start, end)
+		url_md5 = md5.md5(url).hexdigest()
 
 		try:
 			cur = conn.cursor()
 			cur.execute("SET NAMES utf8");
-			sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, date) select %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
-			cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, curTime))
+			sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, url_md5, date) select %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
+			cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, url_md5, curTime))
 		except Exception as err:
 			print(err)
 		finally:
