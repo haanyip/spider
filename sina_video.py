@@ -10,6 +10,7 @@ import time
 import chardet
 import StringIO
 import gzip
+import md5
 import requests
 from urllib import unquote
 import random
@@ -45,7 +46,8 @@ cardType = 1
 bloggerId = 1
 
 for tag in tags:
-	url = 'http://weibo.com' + tag['href']
+	url = 'https://weibo.com' + tag['href']
+	url_md5 = md5.md5(url).hexdigest()
 	img = tag.find('img', 'piccut')
 	imgSrc = 'http:' +  img['src']
 	thumbnail = json.dumps([imgSrc])
@@ -70,8 +72,8 @@ for tag in tags:
 	try:
 		cur = conn.cursor()
 		cur.execute("SET NAMES utf8");
-		sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, video_url, date) select %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
-		cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, video_url, curTime))
+		sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, url_md5, video_url, date) select %s, %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
+		cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, url_md5, video_url, curTime))
 	except Exception as err:
 		print(err)
 	finally:

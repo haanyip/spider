@@ -44,7 +44,7 @@ def get_conn():
 
 def updateUrl(url):
 	conn = get_conn()
-        cur = conn.cursor()
+	cur = conn.cursor()
 	headers = {}
 	try:
 		html = requests.get(url, headers=headers).content

@@ -8,6 +8,7 @@ import MySQLdb
 import json
 import time
 import re
+import md5
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -30,28 +31,29 @@ bloggerId = 5
 tags = j['data']['items']
 
 for tag in tags:
-	desc = tag['summary'].encode('utf-8')
-	thumbnail = json.dumps([tag['cover']])
-        url = 'http://36kr.com/p/%s.html' % (tag['id'])
-	curTime = tag['published_at']	
-	t = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")
-	curTime = int(time.mktime(t))
+    desc = tag['summary'].encode('utf-8')
+    thumbnail = json.dumps([tag['cover']])
+    url = 'http://36kr.com/p/%s.html' % (tag['id'])
+    url_md5 = md5.md5(url).hexdigest()
+    curTime = tag['published_at']
+    t = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")
+    curTime = int(time.mktime(t))
 
-	#print thumbnail
-	#print url
-	#print desc
-	#print curTime
-	#continue
+    #print thumbnail
+    #print url
+    #print desc
+    #print curTime
+    #continue
 
-	try:
-                cur = conn.cursor()
-                cur.execute("SET NAMES utf8");
-                sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, date) select %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
-                cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, curTime))
-        except Exception as err:
-                print(err)
-        finally:
-                cur.close()
+    try:
+        cur = conn.cursor()
+        cur.execute("SET NAMES utf8");
+        sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, url_md5, date) select %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
+        cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, url_md5, curTime))
+    except Exception as err:
+        print(err)
+    finally:
+        cur.close()
 conn.commit()
 conn.close()
 

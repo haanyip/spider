@@ -8,6 +8,7 @@ import MySQLdb
 import json
 import time
 import re
+import md5
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -20,7 +21,7 @@ conn= MySQLdb.connect(
         )
 
 headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36', 'Referer':'http://d.weibo.com/623751_0'}
-headers['Cookie'] = "SINAGLOBAL=850798024487.8599.1503730488759; _s_tentry=baike.baidu.com; Apache=5612558624424.093.1504660628383; ULV=1504660629276:5:2:2:5612558624424.093.1504660628383:1504434385004; UOR=baike.baidu.com,widget.weibo.com,api.atkj6666.cn; YF-Page-G0=fc0a6021b784ae1aaff2d0aa4c9d1f17; login_sid_t=295608409916127c76c479c6a6987ef4; SSOLoginState=1504754252; SCF=ArBzyfBlpZsBETU1LRzngb_-mtG_XGiXTBHIIwT4Q4lab3CcQA2NSTXxvWS2fvEVyPNdjIYF721mxOqBY0_r4cg.; SUB=_2A250tMocDeRhGedH61YZ8SnEzjyIHXVXw7zUrDV8PUNbmtBeLU7ckW8yiJdgezYjuFUhum1dHJsfczbt6Q..; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WFw70a09s3D8YxTSfd6Ph2M5JpX5K2hUgL.Fo24ehBReKMRSK52dJLoI7Uzqg8Vg-LB; SUHB=0C1z1-rfwg4j2C; ALF=1536290251; un=cow007hunter@qq.com; wvr=6; wb_cusLike_1904817850=N";
+headers['Cookie'] = "SINAGLOBAL=850798024487.8599.1503730488759; httpsupgrade_ab=SSL; login_sid_t=83a9aab9b5ca474960e4019c6687bc0f; cross_origin_proto=SSL; _s_tentry=passport.weibo.com; Apache=4361455687243.6895.1505871438176; ULV=1505871438183:1:1:1:4361455687243.6895.1505871438176:; SSOLoginState=1505871450; SCF=ArBzyfBlpZsBETU1LRzngb_-mtG_XGiXTBHIIwT4Q4lakihvo7sKMJE8uWn-tVldoqnSaOt2zI_DnYo2dq7_TnE.; SUB=_2A250xbYKDeRhGedH61YZ8SnEzjyIHXVXsqDCrDV8PUNbmtBeLVPakW8BahSl_y6f5fxD5hiScZFM4DHiRQ..; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WFw70a09s3D8YxTSfd6Ph2M5JpX5K2hUgL.Fo24ehBReKMRSK52dJLoI7Uzqg8Vg-LB; SUHB=08JKs5Z9kwSYCq; ALF=1537407449; un=cow007hunter@qq.com; wvr=6; UOR=,,api.atkj6666.cn; YF-Page-G0=7b9ec0e98d1ec5668c6906382e96b5db"
 
 topUrl = 'http://d.weibo.com/623751_0?ajaxpagelet=1&__ref=/623751_0&_t=FM_150251840107928'
 html = requests.get(topUrl, headers = headers).content
@@ -41,12 +42,13 @@ for tag in tags:
 	if(hasattr(tag.find('div', 'pic_mul'),'ul')):
 		a = tag.find('div', 'text_box').div.a
 		desc = str(a.text)
-		url = 'http:' + a['href']
+		url = 'https:' + a['href']
 		urlHtml = requests.get(url, headers = headers).content
 		s = BeautifulSoup(urlHtml, 'html.parser', from_encoding='utf-8')
 		curTime = s.find('span', 'time').text
-		tuple = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")		
+		tuple = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")
 		curTime = int(time.mktime(tuple))
+		url_md5 = md5.md5(url).hexdigest()
 
 		pic = ''
 		lis = tag.find('div', 'pic_mul').ul.find_all('li')
@@ -58,8 +60,8 @@ for tag in tags:
         	try:
                 	cur = conn.cursor()
                 	cur.execute("SET NAMES utf8");
-                	sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, date) select %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
-                	cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, curTime))
+                	sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, url_md5, date) select %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
+                	cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, url_md5, curTime))
         	except Exception as err:
                 	print(err)
         	finally:

@@ -8,6 +8,7 @@ import MySQLdb
 import json
 import time
 import requests
+import md5
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -35,6 +36,7 @@ for div in divs:
 	imgA = div.find('a', 'cover')
 	if hasattr(imgA, 'href'):
 		url = imgA['href']
+		url_md5 = md5.md5(url).hexdigest()
 		img = str(imgA['style'])
 		img = img[21:-1]
 		img = img.split("?")
@@ -47,7 +49,8 @@ for div in divs:
 		d = s.find('div', 'note-header-container')
 		curTime = d.span.text	
 		tuple = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")
-                curTime = int(time.mktime(tuple))
+		curTime = int(time.mktime(tuple))
+
 		#print url
 		#print thumbnail
 		#print desc
@@ -55,8 +58,8 @@ for div in divs:
 		try:
 			cur = conn.cursor()
 			cur.execute("SET NAMES utf8");
-			sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, date) select %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '" + url + "')";
-			cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, curTime))
+			sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, url_md5, date) select %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '" + url + "')";
+			cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, url_md5, curTime))
 		except Exception as err:
 			print(err)
 		finally:

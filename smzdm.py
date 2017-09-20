@@ -8,6 +8,7 @@ import MySQLdb
 import json
 import time
 import re
+import md5
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -33,8 +34,9 @@ for tag in tags:
 	if tag.has_key('article_title'):
 		desc = tag['article_title'].encode('utf-8')
 		thumbnail = json.dumps([tag['article_img_url']])
-        	url = tag['article_url']
-		curTime = tag['article_pub_date']	
+		url = tag['article_url']
+		url_md5 = md5.md5(url).hexdigest()
+		curTime = tag['article_pub_date']
 		t = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")
 		curTime = int(time.mktime(t))
 
@@ -47,8 +49,8 @@ for tag in tags:
 		try:
                 	cur = conn.cursor()
                 	cur.execute("SET NAMES utf8");
-                	sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, date) select %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
-                	cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, curTime))
+                	sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, url_md5, date) select %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '"+url+"')";
+                	cur.execute(sql,(cardType, bloggerId, desc, thumbnail, url, url_md5, curTime))
         	except Exception as err:
                 	print(err)
         	finally:
