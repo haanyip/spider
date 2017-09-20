@@ -8,9 +8,26 @@ import json
 import time
 import chardet
 import StringIO
+import datetime
 import gzip
+import md5
 import requests
 from bs4 import BeautifulSoup
+
+# 数据库相关配置
+DB_HOST = '127.0.0.1'
+DB_PORT     = 3306
+DB_DATABASE = 'discovery'
+DB_USER     = 'root'
+DB_PASSWORD = ''
+RETRY_TIMES = 5
+SLEEP_TIME = 1
+
+global start
+today = datetime.date.today()
+today = today.strftime('%Y-%m-%d')
+t = time.strptime(today, "%Y-%m-%d")
+start = int(time.mktime(t))
 
 
 def get_conn():
@@ -30,7 +47,8 @@ def get_conn():
     return con
 
 
-def getVideo(csrf_token, page):
+def getVideo(csrf_token, page, date):
+	bloggerId = 7
 	headers['X-CSRF-TOKEN'] = csrf_token
 	headers['X-Requested-With'] = 'XMLHttpRequest'
 	headers['Referer'] = videoUrl
@@ -48,23 +66,26 @@ def getVideo(csrf_token, page):
 		soup = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
 		divs = soup.find_all('div', 'td-col')
 		for div in divs:
+			date = date + 600
 			thumb = div.find('div', 'v-thumb')
 			url = 'http:%s' % (thumb.find('a')['href'])
+			url_md5 = md5.md5(url).hexdigest()
 			img = thumb.find('img')['src']
 			thumbnail = json.dumps([img])
 			title = thumb.find('img')['alt']
 
-			#print title
-			#print url
-			#print img
+			print title
+			print url
+			print thumbnail
+			print date
 
-			sql = "INSERT INTO dis_article (type, blogger_id, content, thumbnail, url) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE video_url";
-			cur.execute(sql, (1, 7, title, thumbnail, url))
+			sql = "INSERT INTO dis_article (type, blogger_id, content, thumbnail, url, url_md5, date) VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE video_url = ''";
+			cur.execute(sql, (1, bloggerId, title, thumbnail, url, url_md5, date))
 		cur.close()
 		conn.commit()
 		conn.close()
 	else:
-		print 'no more video!'
+		print "page %s no more video!" % (page)
 
 	return token
 
@@ -79,11 +100,17 @@ if __name__ == '__main__':
 	req.encoding = 'utf-8'
 	token = req.cookies['_zpdtk']
 
+	today = datetime.date.today()
+	today = today.strftime('%Y-%m-%d')
+	t = time.strptime(today, "%Y-%m-%d")
+	start = int(time.mktime(t))
+
 	for i in range(1, 9999):
+		start = start + 14400
 		if token == '':
 			break
 		else:
-			token = getVideo(token, i)
+			token = getVideo(token, i, start)
 			time.sleep(1)
 
 
