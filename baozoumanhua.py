@@ -37,6 +37,7 @@ for i in range(82, 1000):
 	tags = soup.find_all('div', 'article')
 	curTime = int(time.time())
 	cardType = 1
+	authorId = 2
 
 	for tag in tags:
 		try:
@@ -52,8 +53,8 @@ for i in range(82, 1000):
 			try:
 				cur = conn.cursor()
 				cur.execute("SET NAMES utf8");
-				sql = "insert into dis_entertainment (type, description, thumbnail, url, date) select %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_entertainment WHERE url =%s)";
-				cur.execute(sql,(cardType, desc, thumbnail, url, curTime, url))
+				sql = "insert into dis_entertainment (type, author_id, description, thumbnail, url, date) select %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_entertainment WHERE url =%s)";
+				cur.execute(sql,(cardType, authorId, desc, thumbnail, url, curTime, url))
 			except Exception as err:
 				print(err)
 			finally:
