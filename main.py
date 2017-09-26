@@ -3,22 +3,13 @@ Demonstrates how to use the gevent compatible scheduler to schedule a job that e
 intervals.
 """
 import sys
-from bs4 import BeautifulSoup
-import urllib2
-import MySQLdb
-import json
-import time
-import chardet
-import StringIO
-import gzip
-import md5
-import requests
-from urllib import unquote
-import random
 import configparser
 import os
+import time
+import MySQLdb
 from datetime import datetime
 from apscheduler.schedulers.gevent import GeventScheduler
+
 
 import task.sina_video as sina_video
 import task.smzdm as smzdm
@@ -30,14 +21,14 @@ import task.douban as douban
 import task.qiushibaike as qiushibaike
 import task.study163 as study163
 import task.news as news
-import task.video.baidu_amuse as baidu_amuse;
-import task.video.baidu_beauty as baidu_beauty;
-import task.video.baidu_history as baidu_history;
-import task.video.baidu_music as baidu_music;
-import task.video.baidu_society as baidu_society;
-import task.video.baidu_spoof as baidu_spoof;
-import task.video.baidu_star as baidu_star;
-import task.video.baidu_xiaopin as baidu_xiaopin;
+import task.video.baidu_amuse as baidu_amuse
+import task.video.baidu_beauty as baidu_beauty
+import task.video.baidu_history as baidu_history
+import task.video.baidu_music as baidu_music
+import task.video.baidu_society as baidu_society
+import task.video.baidu_spoof as baidu_spoof
+import task.video.baidu_star as baidu_star
+import task.video.baidu_xiaopin as baidu_xiaopin
 
 
 def get_conn(config):
@@ -48,12 +39,12 @@ def get_conn(config):
     database = config.get('mysql', 'database')
     user = config.get('mysql', 'user')
     password = config.get('mysql', 'password')
-    port = config.get('mysql', 'port')
-    connect_timeout = config.get('mysql', 'connect_timeout')
+    port = int(config.get('mysql', 'port'))
+    connect_timeout = int(config.get('mysql', 'connect_timeout'))
     charset = config.get('mysql', 'charset')
-    retry_times = config.get('mysql', 'retry_times')
-    sleep_time = config.get('mysql', 'sleep_time')
-
+    retry_times = int(config.get('mysql', 'retry_times'))
+    sleep_time = float(config.get('mysql', 'sleep_time'))
+    con = ''
     for i in range(retry_times):
         try:
             con = MySQLdb.connect(
@@ -69,7 +60,7 @@ def get_conn(config):
         except Exception, e:
             time.sleep(sleep_time)
     if not con:
-        write_log('connect db failed')
+        # write_log('connect db failed')
         raise Exception(
             '[create_db] Database connection fails: a null connection is returned, ' + getTraceStackMsg() + ', error_msg: ' + str(
                 e))
@@ -85,7 +76,7 @@ if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf-8')
     config = configparser.ConfigParser()
-    config.read("config.conf")
+    config.read("config.ini")
 
     scheduler = GeventScheduler()
     scheduler.add_executor('processpool')

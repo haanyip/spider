@@ -1,5 +1,6 @@
 #!/usr/bin/python
 #coding=utf-8
+from __init__ import *
 
 def crawl(conn):
 	headers = {}

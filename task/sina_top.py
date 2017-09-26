@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding=utf-8
+from __init__ import *
 
 def crawl(conn):
     headers = {
@@ -34,7 +35,6 @@ def crawl(conn):
             curTime = int(time.mktime(tuple))
             url_md5 = md5.md5(url).hexdigest()
 
-            pic = ''
             lis = tag.find('div', 'pic_mul').ul.find_all('li')
             imgs = []
             for li in lis:
@@ -51,5 +51,6 @@ def crawl(conn):
             finally:
                 cur.close()
 
-conn.commit()
-conn.close()
+
+    conn.commit()
+    conn.close()

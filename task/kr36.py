@@ -1,5 +1,6 @@
 #!/usr/bin/python
-#coding=utf-8
+# coding=utf-8
+from __init__ import *
 
 def crawl(conn):
     headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36', 'Referer':'http://d.weibo.com/623751_0'}
