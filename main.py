@@ -8,6 +8,8 @@ import os
 import time
 import MySQLdb
 from datetime import datetime
+import logging
+import logging.config
 from apscheduler.schedulers.gevent import GeventScheduler
 
 
@@ -22,7 +24,7 @@ import task.qiushibaike as qiushibaike
 import task.study163 as study163
 import task.news as news
 import task.video.baidu_amuse as baidu_amuse
-import task.video.baidu_beauty as baidu_beauty
+import task.video.baidu_cbeauty as baidu_beauty
 import task.video.baidu_history as baidu_history
 import task.video.baidu_music as baidu_music
 import task.video.baidu_society as baidu_society
@@ -68,8 +70,10 @@ def get_conn(config):
     return con
 
 
-def tick(source):
-    print('Tick! The time is: %s' % datetime.now())
+def tick(param):
+    source = eval(param)
+    logger = logging.getLogger(param)
+    logger.info('Starting task %s' % (param))
     conn = get_conn(config)
     source.crawl(conn)
 
@@ -79,6 +83,7 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf-8')
     config = configparser.ConfigParser()
     config.read("config.ini")
+    logging.config.fileConfig("logger.conf")
 
     scheduler = GeventScheduler()
     scheduler.add_executor('processpool')

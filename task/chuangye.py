@@ -17,7 +17,6 @@ def crawl(conn):
 
 	for tag in tags:
 		url = tag['wapurl']
-		thumbnail = ''
 		if tag.has_key('images') and len(tag['images']) > 0:
 			imgs = []
 			for img in tag['images']:
@@ -61,7 +60,7 @@ def crawl(conn):
 			sql = "insert into dis_entrepreneurship (type, title, description, thumbnail, url, html, date) select %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_entrepreneurship WHERE url = %s)";
 			cur.execute(sql, (cardType, title, desc, thumbnail, url, html, curTime, url))
 		except Exception as err:
-			print(err)
+			logging.debug(err)
 		finally:
 			cur.close()
 	conn.commit()

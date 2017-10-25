@@ -43,7 +43,7 @@ def crawl(conn):
             sql = "insert into dis_study (type, title, description, thumbnail, url, date) select %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_study WHERE url =%s)";
             cur.execute(sql, (t, title, desc, thumbnail, url, curTime, url))
         except Exception as err:
-            print(err)
+            logging.debug(err)
         finally:
             cur.close()
     conn.commit()
