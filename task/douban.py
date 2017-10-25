@@ -6,6 +6,7 @@ def crawl(conn):
     headers = {
         'Cookie': 'bid=CsGyT_pW-o0; __yadk_uid=eNufLoUDBxR559J1SkgwqVKoOyrzt2lr; ll="118282"; _pk_ref.100001.8cb4=%5B%22%22%2C%22%22%2C1502527848%2C%22https%3A%2F%2Fwww.baidu.com%2Flink%3Furl%3DaAM8yWpnwY2ebH_tLgEMqwALb3MmZd8VDk2RstslOy3%26wd%3D%26eqid%3Db753cdcb0002310700000006598ec164%22%5D; __utmt=1; _pk_id.100001.8cb4=927d34a87f4268d5.1502438774.3.1502527918.1502441429.; _pk_ses.100001.8cb4=*; __utma=30149280.2018316912.1502438775.1502441432.1502527850.3; __utmb=30149280.4.10.1502527850; __utmc=30149280; __utmz=30149280.1502527850.3.3.utmcsr=baidu|utmccn=(organic)|utmcmd=organic; ap=1',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'}
+
     videoUrl = 'https://www.douban.com/explore/'
     req = requests.get(videoUrl, headers=headers)
     req.encoding = 'utf-8'
@@ -13,7 +14,7 @@ def crawl(conn):
     soup = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
     cardType = 2
     bloggerId = 4
-
+    curTime = int(time.time())
     divs = soup.find_all('div', 'item')
     for div in divs:
         imgA = div.find('a', 'cover')
@@ -27,22 +28,28 @@ def crawl(conn):
             thumbnail = json.dumps([img])
             desc = div.find('p').a.contents
 
-            html = requests.get(url, headers=headers).content
-            s = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
-            d = s.find('div', 'note-header-container')
-            curTime = d.span.text
-            tuple = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")
-            curTime = int(time.mktime(tuple))
-
+            # html = requests.get(url, headers=headers).content
+            # s = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
+            # d = s.find('div', 'note-header-container')
+            # curTime = d.span.text
+            # tuple = time.strptime(curTime, "%Y-%m-%d %H:%M:%S")
+            # curTime = int(time.mktime(tuple))
+            curTime = curTime + 3600
             # print url
             # print thumbnail
             # print desc
 
+            req = requests.get(url, headers=headers)
+            html = req.content
+            soup = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
+            div = soup.find(attrs={"id": "link-report"})
+            html = cgi.escape(str(div), True)
+
             try:
                 cur = conn.cursor()
                 cur.execute("SET NAMES utf8");
-                sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, url_md5, date) select %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '" + url + "')";
-                cur.execute(sql, (cardType, bloggerId, desc, thumbnail, url, url_md5, curTime))
+                sql = "insert into dis_article (type, blogger_id, content, thumbnail, url, url_md5, html, date) select %s, %s, %s, %s, %s, %s, %s, %s FROM DUAL WHERE NOT EXISTS(SELECT url FROM dis_article WHERE url = '" + url + "')";
+                cur.execute(sql, (cardType, bloggerId, desc, thumbnail, url, url_md5, html, curTime))
             except Exception as err:
                 print(err)
             finally:

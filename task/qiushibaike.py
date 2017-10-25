@@ -18,6 +18,7 @@ def crawl(conn):
         authorId = 1
 
         for tag in tags:
+            curTime = curTime + 1800
             url = 'https://www.qiushibaike.com' + tag.find('a', 'contentHerf')['href']
             spans = tag.find('a', 'contentHerf').find_all('span')
             desc = spans[0].text

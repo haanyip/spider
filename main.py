@@ -68,8 +68,10 @@ def get_conn(config):
     return con
 
 
-def tick():
+def tick(source):
     print('Tick! The time is: %s' % datetime.now())
+    conn = get_conn(config)
+    source.crawl(conn)
 
 
 if __name__ == '__main__':
@@ -80,25 +82,25 @@ if __name__ == '__main__':
 
     scheduler = GeventScheduler()
     scheduler.add_executor('processpool')
-    scheduler.add_job(sina_video.crawl(get_conn(config)), 'interval', seconds=7200)
-    scheduler.add_job(smzdm.crawl(get_conn(config)), 'interval', seconds=7200)
-    scheduler.add_job(kr36.crawl(get_conn(config)), 'interval', seconds=7200)
-    scheduler.add_job(sina_top.crawl(get_conn(config)), 'interval', seconds=600)
-    scheduler.add_job(zhihu_daily.crawl(get_conn(config)), 'interval', seconds=86400)
-    scheduler.add_job(chuangye.crawl(get_conn(config)), 'interval', seconds=86400)
-    scheduler.add_job(douban.crawl(get_conn(config)), 'interval', seconds=86400)
-    scheduler.add_job(qiushibaike.crawl(get_conn(config)), 'interval', seconds=86400)
-    scheduler.add_job(study163.crawl(get_conn(config)), 'interval', seconds=600)
-    scheduler.add_job(news.crawl(get_conn(config)), 'interval', seconds=600)
+    scheduler.add_job(tick, 'interval', ['sina_video'], seconds=7200)
+    scheduler.add_job(tick, 'interval', ['smzdm'], seconds=7200)
+    scheduler.add_job(tick, 'interval', ['kr36'], seconds=7200)
+    scheduler.add_job(tick, 'interval', ['sina_top'], seconds=600)
+    scheduler.add_job(tick, 'interval', ['zhihu_daily'], seconds=86400)
+    scheduler.add_job(tick, 'interval', ['chuangye'], seconds=86400)
+    scheduler.add_job(tick, 'interval', ['douban'], seconds=86400)
+    scheduler.add_job(tick, 'interval', ['qiushibaike'], seconds=86400)
+    scheduler.add_job(tick, 'interval', ['study163'], seconds=600)
+    scheduler.add_job(tick, 'interval', ['news'], seconds=600)
 
-    scheduler.add_job(baidu_amuse.crawl(get_conn(config)), 'interval', seconds=3600)
-    scheduler.add_job(baidu_beauty.crawl(get_conn(config)), 'interval', seconds=3600)
-    scheduler.add_job(baidu_history.crawl(get_conn(config)), 'interval', seconds=3600)
-    scheduler.add_job(baidu_music.crawl(get_conn(config)), 'interval', seconds=3600)
-    scheduler.add_job(baidu_society.crawl(get_conn(config)), 'interval', seconds=3600)
-    scheduler.add_job(baidu_spoof.crawl(get_conn(config)), 'interval', seconds=3600)
-    scheduler.add_job(baidu_star.crawl(get_conn(config)), 'interval', seconds=3600)
-    scheduler.add_job(baidu_xiaopin.crawl(get_conn(config)), 'interval', seconds=3600)
+    scheduler.add_job(tick, 'interval', ['baidu_amuse'], seconds=3600)
+    scheduler.add_job(tick, 'interval', ['baidu_beauty'], seconds=3600)
+    scheduler.add_job(tick, 'interval', ['baidu_history'], seconds=3600)
+    scheduler.add_job(tick, 'interval', ['baidu_music'], seconds=3600)
+    scheduler.add_job(tick, 'interval', ['baidu_society'], seconds=3600)
+    scheduler.add_job(tick, 'interval', ['baidu_spoof'], seconds=3600)
+    scheduler.add_job(tick, 'interval', ['baidu_star'], seconds=3600)
+    scheduler.add_job(tick, 'interval', ['baidu_xiaopin'], seconds=3600)
 
     g = scheduler.start()  # g is the greenlet that runs the scheduler loop
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
